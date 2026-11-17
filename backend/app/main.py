@@ -6,8 +6,25 @@ from .algorithms import validate_state, banker_safety, resource_request, detect_
 import os
 
 app = FastAPI(title="OS Deadlock Analysis API", version="1.0.0")
-origins = [x.strip() for x in os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",") if x.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+cors_env = os.getenv("CORS_ORIGINS", "*").strip()
+if cors_env == "*":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    origins = [x.strip() for x in cors_env.split(",") if x.strip()]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 class State(BaseModel):
     allocation: List[List[int]]
